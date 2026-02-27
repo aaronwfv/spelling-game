@@ -1,0 +1,484 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+<title>Spell It! 🌟</title>
+<link href="https://fonts.googleapis.com/css2?family=Fredoka+One&family=Nunito:wght@400;600;700;800&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --sky: #87CEEB;
+    --sunshine: #FFD700;
+    --grass: #52C41A;
+    --coral: #FF6B6B;
+    --lavender: #B39DDB;
+    --mint: #69F0AE;
+    --peach: #FFAB76;
+    --white: #FFFFFF;
+    --dark: #2D3748;
+    --card: rgba(255,255,255,0.92);
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    font-family: 'Nunito', sans-serif;
+    background: linear-gradient(160deg, #a8edea 0%, #fed6e3 100%);
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 20px 16px 40px;
+    overflow-x: hidden;
+  }
+
+  /* Floating stars background */
+  body::before {
+    content: '⭐ 🌟 ✨ ⭐ 🌟 ✨ ⭐';
+    position: fixed;
+    top: -10px;
+    left: 0; right: 0;
+    font-size: 28px;
+    letter-spacing: 40px;
+    opacity: 0.15;
+    animation: drift 20s linear infinite;
+    pointer-events: none;
+    z-index: 0;
+    white-space: nowrap;
+    overflow: hidden;
+  }
+
+  @keyframes drift {
+    0% { transform: translateX(-100px); }
+    100% { transform: translateX(100px); }
+  }
+
+  .app { width: 100%; max-width: 420px; position: relative; z-index: 1; }
+
+  h1 {
+    font-family: 'Fredoka One', cursive;
+    font-size: 2.8rem;
+    color: var(--white);
+    text-align: center;
+    text-shadow: 3px 3px 0 #FF6B6B, 5px 5px 0 rgba(0,0,0,0.1);
+    margin-bottom: 6px;
+    letter-spacing: 1px;
+  }
+
+  .subtitle {
+    text-align: center;
+    color: rgba(255,255,255,0.9);
+    font-weight: 700;
+    font-size: 1rem;
+    margin-bottom: 24px;
+  }
+
+  .card {
+    background: var(--card);
+    border-radius: 24px;
+    padding: 24px 20px;
+    box-shadow: 0 8px 32px rgba(0,0,0,0.12), 0 2px 8px rgba(0,0,0,0.08);
+    margin-bottom: 16px;
+    animation: slideUp 0.4s ease;
+  }
+
+  @keyframes slideUp {
+    from { opacity: 0; transform: translateY(20px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  .section-title {
+    font-family: 'Fredoka One', cursive;
+    font-size: 1.2rem;
+    color: #7B68EE;
+    margin-bottom: 14px;
+  }
+
+  /* Word Setup */
+  #word-input-area {
+    width: 100%;
+    min-height: 100px;
+    border: 2.5px dashed #B39DDB;
+    border-radius: 14px;
+    padding: 12px;
+    font-family: 'Nunito', sans-serif;
+    font-size: 1rem;
+    font-weight: 700;
+    color: var(--dark);
+    resize: none;
+    background: #F8F4FF;
+    outline: none;
+    transition: border-color 0.2s;
+  }
+  #word-input-area:focus { border-color: #7B68EE; background: #fff; }
+
+  .hint { font-size: 0.82rem; color: #999; margin-top: 6px; font-weight: 600; }
+
+  /* Buttons */
+  .btn {
+    display: block;
+    width: 100%;
+    padding: 16px;
+    border: none;
+    border-radius: 16px;
+    font-family: 'Fredoka One', cursive;
+    font-size: 1.2rem;
+    letter-spacing: 0.5px;
+    cursor: pointer;
+    transition: transform 0.1s, box-shadow 0.1s;
+    text-align: center;
+  }
+  .btn:active { transform: scale(0.97); }
+
+  .btn-primary {
+    background: linear-gradient(135deg, #7B68EE, #B39DDB);
+    color: white;
+    box-shadow: 0 4px 15px rgba(123,104,238,0.4);
+  }
+  .btn-say {
+    background: linear-gradient(135deg, #FF6B6B, #FFAB76);
+    color: white;
+    box-shadow: 0 4px 15px rgba(255,107,107,0.4);
+    font-size: 1.4rem;
+    padding: 20px;
+    margin-bottom: 16px;
+  }
+  .btn-check {
+    background: linear-gradient(135deg, #52C41A, #69F0AE);
+    color: white;
+    box-shadow: 0 4px 15px rgba(82,196,26,0.4);
+  }
+  .btn-skip {
+    background: #f0f0f0;
+    color: #999;
+    font-size: 1rem;
+    padding: 12px;
+    margin-top: 10px;
+  }
+  .btn-restart {
+    background: linear-gradient(135deg, #FFD700, #FFAB76);
+    color: white;
+    box-shadow: 0 4px 15px rgba(255,215,0,0.4);
+  }
+
+  /* Progress bar */
+  .progress-wrap {
+    background: #eee;
+    border-radius: 99px;
+    height: 10px;
+    margin-bottom: 20px;
+    overflow: hidden;
+  }
+  .progress-fill {
+    height: 100%;
+    border-radius: 99px;
+    background: linear-gradient(90deg, #7B68EE, #FF6B6B);
+    transition: width 0.5s ease;
+  }
+
+  .word-num {
+    font-weight: 800;
+    color: #7B68EE;
+    font-size: 0.9rem;
+    text-align: right;
+    margin-bottom: 6px;
+  }
+
+  /* Spell input */
+  #spell-input {
+    width: 100%;
+    padding: 18px 16px;
+    font-size: 1.8rem;
+    font-family: 'Fredoka One', cursive;
+    border: 3px solid #ddd;
+    border-radius: 16px;
+    text-align: center;
+    outline: none;
+    letter-spacing: 4px;
+    color: var(--dark);
+    background: #FAFAFA;
+    transition: border-color 0.2s;
+    margin-bottom: 16px;
+  }
+  #spell-input:focus { border-color: #7B68EE; background: white; }
+
+  /* Feedback */
+  .feedback {
+    text-align: center;
+    font-family: 'Fredoka One', cursive;
+    font-size: 1.6rem;
+    padding: 14px;
+    border-radius: 16px;
+    margin-bottom: 14px;
+    display: none;
+    animation: pop 0.3s ease;
+  }
+  @keyframes pop {
+    0% { transform: scale(0.8); opacity: 0; }
+    70% { transform: scale(1.08); }
+    100% { transform: scale(1); opacity: 1; }
+  }
+  .feedback.correct { background: #E8F5E9; color: #388E3C; display: block; }
+  .feedback.wrong { background: #FFF3E0; color: #E64A19; display: block; }
+
+  /* Score */
+  .score-big {
+    font-family: 'Fredoka One', cursive;
+    font-size: 5rem;
+    text-align: center;
+    background: linear-gradient(135deg, #7B68EE, #FF6B6B);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    line-height: 1;
+    margin: 10px 0 4px;
+  }
+  .score-label {
+    text-align: center;
+    color: #999;
+    font-weight: 700;
+    margin-bottom: 20px;
+    font-size: 1rem;
+  }
+  .missed-list {
+    background: #FFF3E0;
+    border-radius: 14px;
+    padding: 14px 16px;
+    margin-bottom: 16px;
+  }
+  .missed-list h3 {
+    font-family: 'Fredoka One', cursive;
+    color: #E64A19;
+    margin-bottom: 10px;
+    font-size: 1rem;
+  }
+  .missed-word {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 6px 0;
+    border-bottom: 1px solid rgba(0,0,0,0.06);
+    font-size: 0.95rem;
+  }
+  .missed-word .correct-answer { color: #388E3C; font-weight: 800; }
+  .missed-word .their-answer { color: #E64A19; text-decoration: line-through; font-weight: 600; }
+
+  /* Celebration */
+  .celebration { font-size: 3rem; text-align: center; margin: 10px 0; animation: bounce 0.5s ease infinite alternate; }
+  @keyframes bounce { from { transform: translateY(0); } to { transform: translateY(-10px); } }
+
+  /* Screens */
+  .screen { display: none; }
+  .screen.active { display: block; }
+</style>
+</head>
+<body>
+<div class="app">
+  <h1>Spell It! ✏️</h1>
+  <p class="subtitle">5th Grade Spelling Practice</p>
+
+  <!-- SETUP SCREEN -->
+  <div id="screen-setup" class="screen active">
+    <div class="card">
+      <div class="section-title">📝 Enter This Week's Words</div>
+      <textarea id="word-input-area" placeholder="Type words here, one per line:&#10;&#10;necessary&#10;accommodate&#10;rhythm&#10;separate&#10;recommend"></textarea>
+      <p class="hint">One word per line. You can add as many as you need!</p>
+    </div>
+    <button class="btn btn-primary" onclick="startGame()">Start Spelling Test! 🚀</button>
+  </div>
+
+  <!-- GAME SCREEN -->
+  <div id="screen-game" class="screen">
+    <div class="card">
+      <div class="word-num" id="word-num"></div>
+      <div class="progress-wrap">
+        <div class="progress-fill" id="progress-fill"></div>
+      </div>
+
+      <div id="feedback" class="feedback"></div>
+
+      <button class="btn btn-say" onclick="sayWord()">🔊 Say the Word Again</button>
+
+      <input
+        type="text"
+        id="spell-input"
+        placeholder="Type your answer..."
+        autocomplete="off"
+        autocorrect="off"
+        autocapitalize="none"
+        spellcheck="false"
+        onkeydown="if(event.key==='Enter') checkSpelling()"
+      />
+
+      <button class="btn btn-check" onclick="checkSpelling()">✅ Check It!</button>
+      <button class="btn btn-skip" onclick="skipWord()">Skip →</button>
+    </div>
+  </div>
+
+  <!-- RESULTS SCREEN -->
+  <div id="screen-results" class="screen">
+    <div class="card">
+      <div id="celebration" class="celebration"></div>
+      <div class="score-big" id="score-display"></div>
+      <div class="score-label" id="score-label"></div>
+
+      <div id="missed-section" class="missed-list" style="display:none">
+        <h3>📚 Words to Practice</h3>
+        <div id="missed-words-list"></div>
+      </div>
+
+      <button class="btn btn-restart" onclick="restart()">🔄 Try Again with Same Words</button>
+      <button class="btn btn-primary" style="margin-top:10px" onclick="newWords()">✏️ Enter New Words</button>
+    </div>
+  </div>
+</div>
+
+<script>
+let words = [];
+let order = [];
+let current = 0;
+let score = 0;
+let missed = [];
+let waitingNext = false;
+
+function startGame() {
+  const raw = document.getElementById('word-input-area').value;
+  words = raw.split('\n')
+    .map(w => w.trim().toLowerCase())
+    .filter(w => w.length > 0);
+
+  if (words.length === 0) {
+    alert('Please enter at least one word!');
+    return;
+  }
+
+  order = [...Array(words.length).keys()].sort(() => Math.random() - 0.5);
+  current = 0;
+  score = 0;
+  missed = [];
+  waitingNext = false;
+
+  showScreen('game');
+  loadWord();
+}
+
+function loadWord() {
+  if (current >= order.length) {
+    showResults();
+    return;
+  }
+  waitingNext = false;
+  const total = order.length;
+  const pct = (current / total) * 100;
+
+  document.getElementById('word-num').textContent = `Word ${current + 1} of ${total}`;
+  document.getElementById('progress-fill').style.width = pct + '%';
+  document.getElementById('spell-input').value = '';
+  document.getElementById('feedback').className = 'feedback';
+  document.getElementById('spell-input').focus();
+
+  setTimeout(() => sayWord(), 300);
+}
+
+function sayWord() {
+  const word = words[order[current]];
+  const utter = new SpeechSynthesisUtterance(word);
+  utter.rate = 0.85;
+  utter.pitch = 1.1;
+  speechSynthesis.cancel();
+  speechSynthesis.speak(utter);
+}
+
+function checkSpelling() {
+  if (waitingNext) { nextWord(); return; }
+
+  const answer = document.getElementById('spell-input').value.trim().toLowerCase();
+  if (!answer) return;
+
+  const correct = words[order[current]];
+  const fb = document.getElementById('feedback');
+
+  if (answer === correct) {
+    score++;
+    fb.textContent = '🎉 Correct! Great job!';
+    fb.className = 'feedback correct';
+  } else {
+    missed.push({ word: correct, given: answer });
+    fb.textContent = `❌ It's "${correct}" — keep practicing!`;
+    fb.className = 'feedback wrong';
+  }
+
+  waitingNext = true;
+  document.getElementById('spell-input').disabled = true;
+
+  setTimeout(() => {
+    document.getElementById('spell-input').disabled = false;
+    nextWord();
+  }, 2000);
+}
+
+function skipWord() {
+  missed.push({ word: words[order[current]], given: '(skipped)' });
+  nextWord();
+}
+
+function nextWord() {
+  current++;
+  loadWord();
+}
+
+function showResults() {
+  showScreen('results');
+  const total = order.length;
+  const pct = Math.round((score / total) * 100);
+  document.getElementById('score-display').textContent = `${score}/${total}`;
+  document.getElementById('score-label').textContent = `${pct}% — ${gradeComment(pct)}`;
+
+  const cel = document.getElementById('celebration');
+  cel.textContent = pct === 100 ? '🏆' : pct >= 80 ? '⭐' : pct >= 60 ? '👍' : '💪';
+
+  const missedSection = document.getElementById('missed-section');
+  if (missed.length > 0) {
+    missedSection.style.display = 'block';
+    const list = document.getElementById('missed-words-list');
+    list.innerHTML = missed.map(m => `
+      <div class="missed-word">
+        <span class="correct-answer">✅ ${m.word}</span>
+        <span class="their-answer">${m.given}</span>
+      </div>
+    `).join('');
+  } else {
+    missedSection.style.display = 'none';
+  }
+}
+
+function gradeComment(pct) {
+  if (pct === 100) return 'Perfect score! 🌟';
+  if (pct >= 90) return 'Almost perfect!';
+  if (pct >= 80) return 'Great work!';
+  if (pct >= 70) return 'Good job!';
+  if (pct >= 60) return 'Keep practicing!';
+  return 'Let\'s practice more!';
+}
+
+function restart() {
+  current = 0;
+  score = 0;
+  missed = [];
+  waitingNext = false;
+  order = [...Array(words.length).keys()].sort(() => Math.random() - 0.5);
+  showScreen('game');
+  loadWord();
+}
+
+function newWords() {
+  showScreen('setup');
+}
+
+function showScreen(name) {
+  document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+  document.getElementById('screen-' + name).classList.add('active');
+}
+</script>
+</body>
+</html>
